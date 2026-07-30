@@ -1,0 +1,10 @@
+# Cloudflare Pages 정적 배포 설정.
+# 저장소 루트의 모든 파일을 정적 자산으로 업로드 →
+#   https://<project>.pages.dev/<파일명>
+# Worker 스크립트 불필요 (정적 자산만). .assetsignore 로 제외 파일 지정.
+
+name = "semi-dashboard"
+compatibility_date = "2026-07-31"
+
+[assets]
+directory = "./"

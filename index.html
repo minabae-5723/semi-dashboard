@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>반도체 밸류체인 대시보드</title>
+  <meta name="description" content="한국 반도체 밸류체인 peer table — 장비/소재/부품/OSAT/팹리스 valuation·수익률·수급 트래킹">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard">
+    <div class="top-bar"></div>
+    <header class="dashboard-header">
+      <div class="dashboard-title"><span class="sc">SEMI</span> 밸류체인 대시보드</div>
+      <div class="dashboard-sub">국내 장비 · 소재 · 부품 · OSAT · 팹리스</div>
+    </header>
+    <div class="updated-line" id="updatedLine"></div>
+
+    <nav class="tabs" id="tabs"></nav>
+    <div class="summary-strip" id="summary"></div>
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr class="cg" id="colGroups"></tr>
+            <tr class="ch" id="colHeaders"></tr>
+          </thead>
+          <tbody id="tbody"><tr><td class="loading">데이터를 불러오는 중…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="footer-note">
+      <span class="src" id="srcNote"></span>
+      <span id="cntNote"></span>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# 로그·임시
+*.log
+*.tmp
+node_modules/
+
+# 로컬 백업
+peer-config.json.bak
+data.json.bak
