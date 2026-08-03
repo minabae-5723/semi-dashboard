@@ -135,6 +135,7 @@ function updateSummary(rows) {
   const w = avg(rows, 'w');
   const fxNet = sum(rows, 'fxNet');
   const mfPer = median(rows, 'fwPer');
+  const mfPbr = median(rows, 'fwPbr');
 
   const tiles = [
     { label: '합산 시총', value: mc ? (mc / 10000).toFixed(1) + '조' : '—' },
@@ -142,6 +143,7 @@ function updateSummary(rows) {
     { label: '평균 1W', value: w != null ? fmt(w, 'pct') + '%' : '—', cls: w > 0 ? 'pos' : w < 0 ? 'neg' : '' },
     { label: '외국인 5D 순매수', value: fxNet ? (fxNet > 0 ? '+' : '') + Math.round(fxNet).toLocaleString('ko-KR') + '억' : '—', cls: fxNet > 0 ? 'pos' : fxNet < 0 ? 'neg' : '' },
     { label: 'fPER 중앙값', value: mfPer != null ? mfPer.toFixed(1) + 'x' : '—' },
+    { label: 'fPBR 중앙값', value: mfPbr != null ? mfPbr.toFixed(1) + 'x' : '—' },
   ];
   $('summary').innerHTML = tiles.map((t) =>
     `<div class="stat-tile"><div class="stat-label">${t.label}</div><div class="stat-value ${t.cls || ''}">${t.value}</div></div>`).join('');
