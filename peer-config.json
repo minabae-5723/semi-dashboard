@@ -30,9 +30,11 @@
     { "code": "281740", "market": "KQ", "name": "레이크머티리얼즈", "stage": "fe", "type": "소재", "step": "증착/산화",     "cust": [] },
     { "code": "311320", "market": "KQ", "name": "지오엘리먼트",     "stage": "fe", "type": "소재", "step": "증착/산화",     "cust": [] },
     { "code": "425040", "market": "KQ", "name": "티이엠씨",         "stage": "fe", "type": "소재", "step": "증착/산화",     "cust": [] },
+    { "code": "241790", "market": "KQ", "name": "티이엠씨씨엔에스", "stage": "fe", "type": "소재", "step": "증착/산화",     "cust": [] },
     { "code": "213420", "market": "KQ", "name": "덕산네오룩스",     "stage": "fe", "type": "소재", "step": "증착/산화",     "cust": [] },
 
-    { "code": "319660", "market": "KQ", "name": "PSK",            "stage": "fe", "type": "장비", "step": "식각",         "cust": [] },
+    { "code": "319660", "market": "KQ", "name": "PSK",            "stage": "fe", "type": "장비", "step": "세정",         "cust": [] },
+    { "code": "089970", "market": "KQ", "name": "브이엠",          "stage": "fe", "type": "장비", "step": "식각",         "cust": ["SK"] },
     { "code": "064760", "market": "KQ", "name": "티씨케이",         "stage": "fe", "type": "부품", "step": "식각",         "cust": ["SK", "해외"] },
     { "code": "166090", "market": "KQ", "name": "하나머티리얼즈",   "stage": "fe", "type": "부품", "step": "식각",         "cust": ["삼성", "SK", "해외"] },
     { "code": "101160", "market": "KQ", "name": "월덱스",          "stage": "fe", "type": "부품", "step": "식각",         "cust": ["삼성", "SK", "해외"] },
@@ -48,10 +50,11 @@
     { "code": "183300", "market": "KQ", "name": "코미코",          "stage": "fe", "type": "부품", "step": "세정",         "cust": ["SK", "해외"] },
     { "code": "079370", "market": "KQ", "name": "제우스",          "stage": "fe", "type": "장비", "step": "세정",         "cust": [] },
     { "code": "170920", "market": "KQ", "name": "엘티씨",          "stage": "fe", "type": "소재", "step": "세정",         "cust": ["삼성", "SK"] },
+    { "code": "144960", "market": "KQ", "name": "뉴파워프라즈마",   "stage": "fe", "type": "부품", "step": "세정",         "cust": [] },
 
     { "code": "403870", "market": "KQ", "name": "HPSP",           "stage": "fe", "type": "장비", "step": "어닐링/열처리", "cust": ["해외"] },
     { "code": "122640", "market": "KQ", "name": "예스티",          "stage": "fe", "type": "장비", "step": "어닐링/열처리", "cust": ["삼성", "SK", "해외"] },
-    { "code": "105550", "market": "KQ", "name": "디이엔티",         "stage": "fe", "type": "장비", "step": "어닐링/열처리", "cust": ["삼성", "SK"] },
+    { "code": "110990", "market": "KQ", "name": "디아이티",         "stage": "fe", "type": "장비", "step": "어닐링/열처리", "cust": ["삼성", "SK"] },
     { "code": "265520", "market": "KQ", "name": "에이피시스템",     "stage": "fe", "type": "장비", "step": "어닐링/열처리", "cust": ["삼성"] },
     { "code": "039030", "market": "KQ", "name": "이오테크닉스",     "stage": "fe", "type": "장비", "step": "어닐링/열처리", "cust": ["삼성", "해외"] },
 
@@ -60,6 +63,7 @@
     { "code": "083310", "market": "KQ", "name": "엘오티베큠",       "stage": "fe", "type": "장비", "step": "팹인프라",     "cust": [] },
     { "code": "036200", "market": "KQ", "name": "유니셈",          "stage": "fe", "type": "장비", "step": "팹인프라",     "cust": ["삼성", "해외"] },
     { "code": "083450", "market": "KQ", "name": "GST",            "stage": "fe", "type": "장비", "step": "팹인프라",     "cust": [] },
+    { "code": "160980", "market": "KQ", "name": "싸이맥스",         "stage": "fe", "type": "장비", "step": "팹인프라",     "cust": [] },
     { "code": "030530", "market": "KQ", "name": "원익홀딩스",       "stage": "fe", "type": "장비", "step": "팹인프라",     "cust": [] },
 
     { "code": "322310", "market": "KQ", "name": "오로스테크놀로지", "stage": "fe", "type": "장비", "step": "계측/검사",     "cust": [] },
@@ -104,6 +108,7 @@
     { "code": "420770", "market": "KQ", "name": "기가비스",         "stage": "be", "type": "장비", "step": "유리기판",     "cust": ["해외"] },
     { "code": "112290", "market": "KQ", "name": "와이씨켐",         "stage": "be", "type": "소재", "step": "유리기판",     "cust": [] },
     { "code": "251370", "market": "KQ", "name": "와이엠티",         "stage": "be", "type": "소재", "step": "유리기판",     "cust": ["삼성", "해외"] },
+    { "code": "256630", "market": "KQ", "name": "포인트엔지니어링", "stage": "be", "type": "부품", "step": "유리기판",     "cust": [] },
     { "code": "204270", "market": "KQ", "name": "제이앤티씨",       "stage": "be", "type": "소재", "step": "유리기판",     "cust": [] },
     { "code": "011790", "market": "KS", "name": "SKC",            "stage": "be", "type": "소재", "step": "유리기판",     "cust": ["삼성"] },
     { "code": "089010", "market": "KQ", "name": "켐트로닉스",       "stage": "be", "type": "소재", "step": "유리기판",     "cust": [] },
