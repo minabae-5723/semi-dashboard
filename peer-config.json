@@ -82,6 +82,7 @@
     { "code": "253590", "market": "KQ", "name": "네오셈",          "stage": "be", "type": "장비", "step": "테스트장비",   "cust": ["삼성"] },
     { "code": "092870", "market": "KQ", "name": "엑시콘",          "stage": "be", "type": "장비", "step": "테스트장비",   "cust": ["해외"] },
     { "code": "086390", "market": "KQ", "name": "유니테스트",       "stage": "be", "type": "장비", "step": "테스트장비",   "cust": ["SK", "해외"] },
+    { "code": "217190", "market": "KQ", "name": "제너셈",          "stage": "be", "type": "장비", "step": "테스트장비",   "cust": [] },
 
     { "code": "058470", "market": "KQ", "name": "리노공업",         "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": [] },
     { "code": "095340", "market": "KQ", "name": "ISC",            "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": ["삼성"] },
@@ -90,6 +91,8 @@
     { "code": "219130", "market": "KQ", "name": "타이거일렉",       "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": [] },
     { "code": "425420", "market": "KQ", "name": "티에프이",         "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": ["삼성", "SK"] },
     { "code": "080580", "market": "KQ", "name": "오킨스전자",       "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": ["삼성"] },
+    { "code": "098120", "market": "KQ", "name": "마이크로컨텍솔",   "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": [] },
+    { "code": "321260", "market": "KQ", "name": "프로이천",         "stage": "be", "type": "부품", "step": "프로브/소켓",   "cust": [] },
 
     { "code": "033160", "market": "KQ", "name": "엠케이전자",       "stage": "be", "type": "소재", "step": "패키징소재",   "cust": ["삼성"] },
     { "code": "077360", "market": "KQ", "name": "덕산하이메탈",     "stage": "be", "type": "소재", "step": "패키징소재",   "cust": ["삼성", "SK", "해외"] },
@@ -127,6 +130,7 @@
     { "code": "168360", "market": "KQ", "name": "펨트론",          "stage": "be", "type": "장비", "step": "계측/검사",     "cust": ["SK"] },
     { "code": "140860", "market": "KQ", "name": "파크시스템스",     "stage": "be", "type": "장비", "step": "계측/검사",     "cust": [] },
     { "code": "064290", "market": "KQ", "name": "인텍플러스",       "stage": "be", "type": "장비", "step": "계측/검사",     "cust": [] },
+    { "code": "049950", "market": "KQ", "name": "미래컴퍼니",       "stage": "be", "type": "장비", "step": "계측/검사",     "cust": [] },
 
     { "code": "108320", "market": "KQ", "name": "LX세미콘",        "stage": "fabless", "type": "팹리스", "step": "팹리스",   "cust": [] },
     { "code": "054450", "market": "KQ", "name": "텔레칩스",         "stage": "fabless", "type": "팹리스", "step": "팹리스",   "cust": [] },
