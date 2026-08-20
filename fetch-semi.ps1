@@ -208,8 +208,7 @@ if ($yRow) { Write-Host (" Year start: " + $yRow.date) }
 
 # ----------- Per-ticker fetch -----------
 
-$rowsBySeg = [ordered]@{}
-foreach ($s in $cfg.segments) { $rowsBySeg[$s.id] = @() }
+$rowsAll = @()
 
 $i = 0
 foreach ($t in $tickers) {
@@ -237,9 +236,13 @@ foreach ($t in $tickers) {
     Start-Sleep -Milliseconds 250
     $flow = Get-NaverFlow -code $t.code
 
-    $rowsBySeg[$t.seg] += [PSCustomObject]@{
+    $rowsAll += [PSCustomObject]@{
         code   = $t.code
         n      = $t.name
+        stage  = $t.stage
+        type   = $t.type
+        step   = $t.step
+        cust   = @($t.cust)
         mc     = $nav.mcap
         price  = $price
         w      = $w
@@ -273,8 +276,11 @@ $result = [ordered]@{
         source    = 'Yahoo Finance (price/returns) + Naver Finance (mcap/PER/PBR/수급)'
         note      = '순매수는 최근 5거래일 누적(억원, 종가기준 환산). PER/PBR은 TTM, fPER/fPBR은 선행(FY1). EPS성장/ROE 컨센서스는 별도 주간 갱신.'
     }
-    segments = @($cfg.segments)
-    rows     = $rowsBySeg
+    stages   = @($cfg.stages)
+    types    = @($cfg.types)
+    steps    = $cfg.steps
+    custs    = @($cfg.custs)
+    rows     = @($rowsAll)
 }
 
 $out = Join-Path $root 'data.json'
