@@ -272,8 +272,8 @@ $result = [ordered]@{
         wDate     = if ($wRow) { $wRow.date } else { $null }
         mDate     = if ($mRow) { $mRow.date } else { $null }
         yDate     = if ($yRow) { $yRow.date } else { $null }
-        source    = 'Yahoo Finance (price/returns) + Naver Finance (mcap/PER/PBR/수급)'
-        note      = '순매수는 최근 5거래일 누적(억원, 종가기준 환산). PER/PBR은 TTM, fPER/fPBR은 선행(FY1). EPS성장/ROE 컨센서스는 별도 주간 갱신.'
+        source    = 'Yahoo Finance (price/returns) + Naver mobile API (mcap/PER/PBR/flows)'
+        note      = 'Net buy = 5-day cumulative (100M KRW, close-based). PER/PBR = TTM, fPER/fPBR = forward (FY est). ROE/EPS-growth consensus updated weekly.'
     }
     stages   = @($cfg.stages)
     types    = @($cfg.types)
@@ -283,9 +283,25 @@ $result = [ordered]@{
 }
 
 $out = Join-Path $root 'data.json'
+
+# ----------- Quality guard -----------
+# If a data source breaks (e.g. Naver HTML/API change), valuation collapses to null.
+# Do NOT overwrite a healthy previous data.json with degraded data -> live stays good.
+$total  = @($rowsAll).Count
+$newPbr = @($rowsAll | Where-Object { $null -ne $_.pbr }).Count
+$newMc  = @($rowsAll | Where-Object { $null -ne $_.mc  }).Count
+$floor  = [int]($total * 0.5)
+if ($total -gt 0 -and (($newPbr -lt $floor) -or ($newMc -lt $floor)) -and (Test-Path -LiteralPath $out)) {
+    Write-Host ""
+    Write-Host (" QUALITY GUARD TRIPPED: valuation coverage collapsed (pbr=" + $newPbr + " mc=" + $newMc + " / " + $total + ").") -ForegroundColor Red
+    Write-Host " Previous data.json kept (NOT overwritten). A data source likely changed - check Naver endpoints." -ForegroundColor Red
+    Write-Host "========================================================" -ForegroundColor Cyan
+    exit 1
+}
+
 $json = $result | ConvertTo-Json -Depth 8
 [System.IO.File]::WriteAllText($out, $json, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Host ""
-Write-Host (" Saved -> " + $out + "  (" + ((Get-Item -LiteralPath $out).Length) + " bytes)") -ForegroundColor Green
+Write-Host (" Saved -> " + $out + "  (" + ((Get-Item -LiteralPath $out).Length) + " bytes)  [pbr " + $newPbr + "/" + $total + ", mc " + $newMc + "/" + $total + "]") -ForegroundColor Green
 Write-Host "========================================================" -ForegroundColor Cyan
