@@ -70,108 +70,107 @@ function Find-ClosestClose {
     return $best
 }
 
+# ----- Naver mobile JSON parse helpers (ASCII-only; unit chars via code points) -----
+$NV_HDR = @{ Referer = 'https://m.stock.naver.com/' }
+
+function ConvertTo-Num {
+    # strip all but digits/dot/minus -> double, else null
+    param($s)
+    if ($null -eq $s) { return $null }
+    $t = ([string]$s) -replace '[^0-9.\-]', ''
+    if ($t -match '^-?\d+(\.\d+)?$') { return [double]$t } else { return $null }
+}
+
+function ConvertTo-Mcap {
+    # market cap string -> value in 100M-KRW (eok). "N jo M eok" -> N*10000+M ; "M eok" -> M
+    param($s)
+    if ($null -eq $s) { return $null }
+    $str = [string]$s
+    $jo  = [char]0xC870
+    $nums = @([regex]::Matches($str, '[\d,]+') | ForEach-Object { [double]($_.Value -replace ',', '') })
+    if ($nums.Count -eq 0) { return $null }
+    if ($str.Contains($jo)) {
+        if ($nums.Count -ge 2) { return ($nums[0] * 10000) + $nums[1] }
+        return $nums[0] * 10000
+    }
+    return $nums[0]
+}
+
 function Get-NaverSnapshot {
+    # Naver desktop HTML broke (2026-09); use mobile JSON APIs.
+    #   /integration    -> marketValue, per, pbr, eps, bps (TTM)
+    #   /finance/annual -> forward PER/PBR (latest annual column = FY estimate)
     param([string]$code)
-    $url = "https://finance.naver.com/item/main.naver?code=${code}"
     $result = [ordered]@{ mcap=$null; per=$null; pbr=$null; eps=$null; bps=$null; fwdPer=$null; fwdPbr=$null }
     try {
-        $r = Invoke-WebRequest -Uri $url -UseBasicParsing -UserAgent $UA -TimeoutSec 15
-        $rawBytes = [System.Text.Encoding]::GetEncoding('iso-8859-1').GetBytes($r.Content)
-        $html = [System.Text.Encoding]::GetEncoding('EUC-KR').GetString($rawBytes)
-
-        # Market cap: <em id="_market_sum"> "1,655 9,584" (조 억) or "3,069" (억)
-        $mcapM = [regex]::Match($html, 'id="_market_sum"[^>]*>(.*?)</em>', 'Singleline')
-        if ($mcapM.Success) {
-            $raw = $mcapM.Groups[1].Value -replace '<[^>]+>', '' -replace '&nbsp;', ' '
-            $nums = @([regex]::Matches($raw, '[\d,]+') | ForEach-Object { [double]($_.Value -replace ',', '') })
-            if ($nums.Count -ge 2)     { $result.mcap = ($nums[0] * 10000) + $nums[1] }
-            elseif ($nums.Count -eq 1) { $result.mcap = $nums[0] }
-        }
-
-        foreach ($key in @('per','pbr','eps','bps')) {
-            $m = [regex]::Match($html, ('id="_' + $key + '"[^>]*>(.*?)</em>'), 'Singleline')
-            if ($m.Success) {
-                $v = ($m.Groups[1].Value -replace '<[^>]+>', '' -replace ',', '').Trim()
-                if ($v -match '^-?\d+(\.\d+)?$') { $result[$key] = [double]$v }
-            }
-        }
-
-        # Forward (FY1) PER & PBR: 기업실적분석 4th <td> = next-fiscal estimate.
-        $fwdMap = @{ fwdPer = 'th_cop_anal20'; fwdPbr = 'th_cop_anal21' }
-        foreach ($key in $fwdMap.Keys) {
-            $cls = $fwdMap[$key]
-            $rowM = [regex]::Match($html, ('<tr[^>]*>\s*<th[^>]*' + $cls + '[^>]*>.*?</tr>'), 'Singleline')
-            if ($rowM.Success) {
-                $tdMatches = [regex]::Matches($rowM.Value, '<td[^>]*>(.*?)</td>', 'Singleline')
-                if ($tdMatches.Count -ge 4) {
-                    $cell = $tdMatches[3].Groups[1].Value
-                    $val = ($cell -replace '<[^>]+>', '' -replace '&nbsp;', '' -replace '[,\s]', '').Trim()
-                    if ($val -match '^-?\d+(\.\d+)?$') { $result[$key] = [double]$val }
-                }
-            }
-        }
-        return $result
+        $u1 = "https://m.stock.naver.com/api/stock/$code/integration"
+        $j  = (Invoke-WebRequest -Uri $u1 -Headers $NV_HDR -UserAgent $UA -UseBasicParsing -TimeoutSec 15).Content | ConvertFrom-Json
+        $map = @{}
+        foreach ($ti in $j.totalInfos) { $map[$ti.code] = $ti.value }
+        $result.mcap = ConvertTo-Mcap $map['marketValue']
+        $result.per  = ConvertTo-Num  $map['per']
+        $result.pbr  = ConvertTo-Num  $map['pbr']
+        $result.eps  = ConvertTo-Num  $map['eps']
+        $result.bps  = ConvertTo-Num  $map['bps']
     } catch {
-        Write-Host ("    Naver snapshot error " + $code + ": " + $_.Exception.Message) -ForegroundColor DarkYellow
-        return $result
+        Write-Host ("    Naver integration error " + $code + ": " + $_.Exception.Message) -ForegroundColor DarkYellow
     }
+    try {
+        $u2 = "https://m.stock.naver.com/api/stock/$code/finance/annual"
+        $f  = (Invoke-WebRequest -Uri $u2 -Headers $NV_HDR -UserAgent $UA -UseBasicParsing -TimeoutSec 15).Content | ConvertFrom-Json
+        $rows = $f.financeInfo.rowList
+        $perRow = $rows | Where-Object { $_.title -eq 'PER' } | Select-Object -First 1
+        $pbrRow = $rows | Where-Object { $_.title -eq 'PBR' } | Select-Object -First 1
+        if ($perRow) {
+            $lastKey = ($perRow.columns.PSObject.Properties.Name | Sort-Object)[-1]
+            $result.fwdPer = ConvertTo-Num $perRow.columns.$lastKey.value
+            if ($pbrRow) { $result.fwdPbr = ConvertTo-Num $pbrRow.columns.$lastKey.value }
+        }
+    } catch {
+        Write-Host ("    Naver annual error " + $code + ": " + $_.Exception.Message) -ForegroundColor DarkYellow
+    }
+    return $result
 }
 
 function Get-NaverFlow {
-    # 외국인/기관 매매동향 (frgn). Table columns per dated row:
-    #  0 date | 1 close | 2 chg | 3 chg% | 4 volume | 5 inst netQty
-    #  6 foreign netQty | 7 foreign shares held | 8 foreign holding %
-    # Returns: 5D cumulative foreign/inst net BUY in 억원 (netQty*close/1e8),
-    #          foreign holding %, latest 거래대금(억), 회전율(%), 상장주식수.
-    param([string]$code)
-    $url = "https://finance.naver.com/item/frgn.naver?code=${code}"
+    # Foreign/institution flow. frgn.naver HTML broke (2026-09); use mobile /trend JSON.
+    #   fields: bizdate, foreignerPureBuyQuant, organPureBuyQuant, foreignerHoldRatio,
+    #           closePrice, accumulatedTradingVolume (10 rows, newest first)
+    # Returns: 5D cumulative foreign/inst net BUY (eok), foreign holding %,
+    #          latest trading value (eok), turnover %. Turn needs shares -> from mcap/price.
+    param([string]$code, [double]$mcap = 0, [double]$price = 0)
     $out = [ordered]@{ fxNet=$null; instNet=$null; fxPct=$null; tval=$null; turn=$null }
     try {
-        $r = Invoke-WebRequest -Uri $url -UseBasicParsing -UserAgent $UA -TimeoutSec 15
-        $rawBytes = [System.Text.Encoding]::GetEncoding('iso-8859-1').GetBytes($r.Content)
-        $html = [System.Text.Encoding]::GetEncoding('EUC-KR').GetString($rawBytes)
+        $url = "https://m.stock.naver.com/api/stock/$code/trend"
+        $arr = (Invoke-WebRequest -Uri $url -Headers $NV_HDR -UserAgent $UA -UseBasicParsing -TimeoutSec 15).Content | ConvertFrom-Json
+        if (-not $arr -or $arr.Count -eq 0) { return $out }
 
-        $rows = [regex]::Matches($html, '<tr[^>]*>(?:(?!</tr>).)*?\d{4}\.\d{2}\.\d{2}(?:(?!</tr>).)*?</tr>', 'Singleline')
-        if ($rows.Count -eq 0) { return $out }
+        $latest = $arr[0]
+        $out.fxPct = ConvertTo-Num $latest.foreignerHoldRatio
+        $lvol   = ConvertTo-Num $latest.accumulatedTradingVolume
+        $lclose = ConvertTo-Num $latest.closePrice
 
-        $parsed = @()
-        foreach ($row in $rows) {
-            $cells = @([regex]::Matches($row.Value, '<td[^>]*>(.*?)</td>', 'Singleline') |
-                ForEach-Object { ($_.Groups[1].Value -replace '<[^>]+>','' -replace '&nbsp;',' ' -replace '\s+',' ').Trim() })
-            if ($cells.Count -lt 9) { continue }
-            $num = { param($s) $t = ($s -replace '[+,%\s]','') ; if ($t -match '^-?\d+(\.\d+)?$') { [double]$t } else { $null } }
-            $parsed += [PSCustomObject]@{
-                close   = & $num $cells[1]
-                vol     = & $num $cells[4]
-                instQty = & $num $cells[5]
-                fxQty   = & $num $cells[6]
-                fxShare = & $num $cells[7]
-                fxPct   = & $num $cells[8]
-            }
+        # trading value (eok) = volume * close / 1e8
+        if ($null -ne $lvol -and $null -ne $lclose) {
+            $out.tval = [Math]::Round(($lvol * $lclose) / 1e8, 0)
         }
-        if ($parsed.Count -eq 0) { return $out }
-
-        $latest = $parsed[0]
-        $out.fxPct = $latest.fxPct
-
-        # 거래대금(억) = 거래량 * 종가 / 1e8
-        if ($null -ne $latest.vol -and $null -ne $latest.close) {
-            $out.tval = [Math]::Round(($latest.vol * $latest.close) / 1e8, 0)
-        }
-        # 상장주식수 = 외국인 보유주수 / (외국인 지분율/100)  ->  회전율 = 거래량/상장주식수*100
-        if ($null -ne $latest.fxShare -and $null -ne $latest.fxPct -and $latest.fxPct -gt 0 -and $null -ne $latest.vol) {
-            $shares = $latest.fxShare / ($latest.fxPct / 100.0)
-            if ($shares -gt 0) { $out.turn = [Math]::Round(($latest.vol / $shares) * 100.0, 2) }
+        # turnover = volume / shares * 100 ; shares = mcap(eok)*1e8 / price
+        if ($mcap -gt 0 -and $price -gt 0 -and $null -ne $lvol) {
+            $shares = ($mcap * 1e8) / $price
+            if ($shares -gt 0) { $out.turn = [Math]::Round(($lvol / $shares) * 100.0, 2) }
         }
 
-        # 5D 누적 순매수 (억원) = sum(netQty * close) / 1e8  over up to 5 latest rows
-        $take = [Math]::Min(5, $parsed.Count)
+        # 5D cumulative net buy (eok) = sum(netQty * close) / 1e8 over up to 5 latest rows
+        $take = [Math]::Min(5, $arr.Count)
         $fxSum = 0.0; $instSum = 0.0; $ok = $false
         for ($j = 0; $j -lt $take; $j++) {
-            $p = $parsed[$j]
-            if ($null -ne $p.close) {
-                if ($null -ne $p.fxQty)   { $fxSum   += $p.fxQty   * $p.close; $ok = $true }
-                if ($null -ne $p.instQty) { $instSum += $p.instQty * $p.close }
+            $p = $arr[$j]
+            $c = ConvertTo-Num $p.closePrice
+            if ($null -ne $c) {
+                $fq = ConvertTo-Num $p.foreignerPureBuyQuant
+                $oq = ConvertTo-Num $p.organPureBuyQuant
+                if ($null -ne $fq) { $fxSum   += $fq * $c; $ok = $true }
+                if ($null -ne $oq) { $instSum += $oq * $c }
             }
         }
         if ($ok) {
@@ -180,7 +179,7 @@ function Get-NaverFlow {
         }
         return $out
     } catch {
-        Write-Host ("    Naver flow error " + $code + ": " + $_.Exception.Message) -ForegroundColor DarkYellow
+        Write-Host ("    Naver trend error " + $code + ": " + $_.Exception.Message) -ForegroundColor DarkYellow
         return $out
     }
 }
@@ -234,7 +233,7 @@ foreach ($t in $tickers) {
     Start-Sleep -Milliseconds 250
     $nav  = Get-NaverSnapshot -code $t.code
     Start-Sleep -Milliseconds 250
-    $flow = Get-NaverFlow -code $t.code
+    $flow = Get-NaverFlow -code $t.code -mcap ([double]($nav.mcap)) -price ([double]$price)
 
     $rowsAll += [PSCustomObject]@{
         code   = $t.code
