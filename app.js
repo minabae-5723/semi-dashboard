@@ -25,7 +25,7 @@ const COLS = [
 const CUST_COLOR = { '삼성': 'samsung', 'SK': 'sk', '해외': 'os' };
 
 let DATA = null;
-let curStage = 'fe';
+let curStage = 'all';
 let fType = new Set();
 let fStep = new Set();
 let fCust = new Set();
@@ -77,7 +77,10 @@ function typeSlug(t) {
 }
 
 // ---------- taxonomy helpers ----------
+// 'all' is a synthetic first-tier tab spanning every stage.
+const ALL_STAGE = 'all';
 function stageRows(stage) {
+  if (stage === ALL_STAGE) return (DATA.rows || []);
   return (DATA.rows || []).filter((r) => r.stage === stage);
 }
 function typesInStage(stage) {
@@ -85,8 +88,15 @@ function typesInStage(stage) {
   return (DATA.types || []).filter((t) => present.has(t));
 }
 function stepsInStage(stage) {
-  const defined = (DATA.steps && DATA.steps[stage]) ? DATA.steps[stage] : [];
   const present = new Set(stageRows(stage).map((r) => r.step));
+  let defined;
+  if (stage === ALL_STAGE) {
+    // union of every stage's step order, then any extras present
+    defined = [];
+    for (const s of Object.values(DATA.steps || {})) for (const st of s) if (!defined.includes(st)) defined.push(st);
+  } else {
+    defined = (DATA.steps && DATA.steps[stage]) ? DATA.steps[stage] : [];
+  }
   const extra = [...present].filter((s) => !defined.includes(s));
   return [...defined.filter((s) => present.has(s)), ...extra];
 }
@@ -184,9 +194,10 @@ function render() {
   buildColHeaders();
   updateSummary(rows);
   const stg = DATA.stages.find((s) => s.id === curStage);
+  const stgLabel = curStage === ALL_STAGE ? '전체' : (stg ? stg.label : '');
   $('cntNote').textContent = isSearching()
     ? `검색 "${search.trim()}" · 전체 ${rows.length}개 종목`
-    : `${stg ? stg.label : ''} · ${rows.length}개 종목`;
+    : `${stgLabel} · ${rows.length}개 종목`;
 }
 
 function avg(rows, key) {
@@ -276,7 +287,8 @@ function switchStage(id) {
 window.switchStage = switchStage;
 
 function buildTabs() {
-  $('tabs').innerHTML = DATA.stages.map((s) => {
+  const tabs = [{ id: ALL_STAGE, label: '전체' }, ...DATA.stages];
+  $('tabs').innerHTML = tabs.map((s) => {
     const cnt = stageRows(s.id).length;
     return `<button class="tab${s.id === curStage ? ' active' : ''}" data-stage="${s.id}" onclick="switchStage('${s.id}')">${s.label}<span class="cnt">${cnt}</span></button>`;
   }).join('');
