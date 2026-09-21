@@ -1,18 +1,23 @@
 {
   "_comment": "반도체 밸류체인 대시보드 로스터. market: KS=KOSPI, KQ=KOSDAQ. stage: fe(전공정)/be(후공정)/fabless(설계). type: 장비/소재/부품/OSAT/기판/팹리스. step: 세부공정. cust: 고객사 배지(삼성/SK/해외, 블로그 DART 기반 명시분만). verify=true면 코드 재확인.",
   "stages": [
+    { "id": "idm",     "label": "IDM" },
     { "id": "fe",      "label": "전공정" },
     { "id": "be",      "label": "후공정" },
     { "id": "fabless", "label": "팹리스·IP" }
   ],
-  "types": ["장비", "소재", "부품", "OSAT", "기판", "팹리스"],
+  "types": ["IDM", "장비", "소재", "부품", "OSAT", "기판", "팹리스"],
   "steps": {
+    "idm": ["메모리", "종합반도체"],
     "fe": ["포토/마스크", "증착/산화", "식각", "세정", "CMP", "어닐링/열처리", "팹인프라", "계측/검사"],
     "be": ["테스트장비", "프로브/소켓", "본딩/리플로우", "패키징소재", "기판", "유리기판", "OSAT", "계측/검사"],
     "fabless": ["팹리스", "디자인/IP"]
   },
   "custs": ["삼성", "SK", "해외"],
   "tickers": [
+    { "code": "005930", "market": "KS", "name": "삼성전자",         "stage": "idm", "type": "IDM", "step": "종합반도체", "cust": [] },
+    { "code": "000660", "market": "KS", "name": "SK하이닉스",       "stage": "idm", "type": "IDM", "step": "메모리",     "cust": [] },
+
     { "code": "005290", "market": "KQ", "name": "동진세미켐",       "stage": "fe", "type": "소재", "step": "포토/마스크",   "cust": ["삼성", "SK"] },
     { "code": "101490", "market": "KQ", "name": "에스앤에스텍",     "stage": "fe", "type": "소재", "step": "포토/마스크",   "cust": ["삼성"] },
     { "code": "036810", "market": "KQ", "name": "에프에스티",       "stage": "fe", "type": "소재", "step": "포토/마스크",   "cust": [] },

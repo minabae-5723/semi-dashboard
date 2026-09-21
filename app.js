@@ -91,17 +91,28 @@ function stepsInStage(stage) {
   return [...defined.filter((s) => present.has(s)), ...extra];
 }
 
+function matchSearch(r, q) {
+  return r.n.toLowerCase().includes(q)
+    || String(r.code).includes(q)
+    || (r.step || '').toLowerCase().includes(q)
+    || (r.type || '').toLowerCase().includes(q);
+}
+
+function isSearching() { return search.trim().length > 0; }
+
 function filteredRows() {
+  // Search is GLOBAL: when a query is present, ignore stage tab and all filter pills,
+  // and match across the entire universe.
+  if (isSearching()) {
+    const q = search.trim().toLowerCase();
+    return (DATA.rows || []).filter((r) => matchSearch(r, q));
+  }
   return stageRows(curStage).filter((r) => {
     if (fType.size && !fType.has(r.type)) return false;
     if (fStep.size && !fStep.has(r.step)) return false;
     if (fCust.size) {
       const cs = Array.isArray(r.cust) ? r.cust : [];
       if (!cs.some((c) => fCust.has(c))) return false;
-    }
-    if (search) {
-      const q = search.toLowerCase();
-      if (!(r.n.toLowerCase().includes(q) || String(r.code).includes(q) || (r.step || '').toLowerCase().includes(q))) return false;
     }
     return true;
   });
@@ -173,7 +184,9 @@ function render() {
   buildColHeaders();
   updateSummary(rows);
   const stg = DATA.stages.find((s) => s.id === curStage);
-  $('cntNote').textContent = `${stg ? stg.label : ''} · ${rows.length}개 종목`;
+  $('cntNote').textContent = isSearching()
+    ? `검색 "${search.trim()}" · 전체 ${rows.length}개 종목`
+    : `${stg ? stg.label : ''} · ${rows.length}개 종목`;
 }
 
 function avg(rows, key) {
