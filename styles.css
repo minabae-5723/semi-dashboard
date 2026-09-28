@@ -128,6 +128,20 @@ body {
 .cbadge.c-os { background: #0a7b3e; }
 td .muted { color: var(--text-3); }
 
+/* ── column header tooltip (수급 등 지표 설명) ── */
+.ch th .info {
+  display: inline-block; margin-left: 3px; font-size: 10px; font-weight: 400;
+  color: var(--text-3); cursor: help; vertical-align: middle; opacity: 0.75;
+}
+.ch th .info:hover { opacity: 1; color: var(--accent); }
+.col-tip {
+  display: none; position: fixed; z-index: 9999; max-width: 240px;
+  background: var(--accent); color: #fff; font-size: 11.5px; font-weight: 400;
+  line-height: 1.45; letter-spacing: 0.01em; text-align: left;
+  padding: 8px 10px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  pointer-events: none; white-space: normal; font-variant-numeric: normal;
+}
+
 .summary-strip {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px;

@@ -15,11 +15,11 @@ const COLS = [
   { key: 'pbr',    label: 'PBR(배)',  group: 'Valuation',  fmt: 'f1' },
   { key: 'fwPer',  label: 'fPER(배)', group: 'Valuation',  fmt: 'f1' },
   { key: 'fwPbr',  label: 'fPBR(배)', group: 'Valuation',  fmt: 'f1' },
-  { key: 'fxPct',  label: '외국인(%)', group: '수급',        fmt: 'f1' },
-  { key: 'fxNet',  label: '외국인5D(억)', group: '수급',      fmt: 'flow' },
-  { key: 'instNet',label: '기관5D(억)', group: '수급',       fmt: 'flow' },
-  { key: 'tval',   label: '거래대금(억)', group: '수급',      fmt: 'int' },
-  { key: 'turn',   label: '회전율(%)', group: '수급',        fmt: 'f2' },
+  { key: 'fxPct',  label: '외국인(%)', group: '수급',        fmt: 'f1',   desc: '외국인 지분율 — 상장주식 중 외국인 보유 비중 (최신 거래일). 보유 잔량(스톡) 지표.' },
+  { key: 'fxNet',  label: '외국인5D(억)', group: '수급',      fmt: 'flow', desc: '외국인 순매수 최근 5거래일 누적(억원). + 순매수(유입) / − 순매도(유출). 일별 순매수수량 × 종가 합산.' },
+  { key: 'instNet',label: '기관5D(억)', group: '수급',       fmt: 'flow', desc: '기관 순매수 최근 5거래일 누적(억원). + 순매수(유입) / − 순매도(유출).' },
+  { key: 'tval',   label: '거래대금(억)', group: '수급',      fmt: 'int',  desc: '최신 거래일 거래대금(억원) = 거래량 × 종가. 방향이 아닌 유동성·관심도 강도.' },
+  { key: 'turn',   label: '회전율(%)', group: '수급',        fmt: 'f2',   desc: '회전율 = 거래량 ÷ 상장주식수 × 100. 하루에 주식이 얼마나 손바뀜했는지(단기 매매 강도).' },
 ];
 
 const CUST_COLOR = { '삼성': 'samsung', 'SK': 'sk', '해외': 'os' };
@@ -154,9 +154,38 @@ function buildColHeaders() {
       c.key === sortKey ? (sortDir === 1 ? 'asc' : 'desc') : '',
       flags[i] && i > 0 ? 'grp-sep' : '',
     ].filter(Boolean).join(' ');
-    return `<th class="${cls}" onclick="handleSort('${c.key}')">${c.label}<span class="arr"></span></th>`;
+    const mark = c.desc ? `<span class="info" data-tip="${c.desc}">&#9432;</span>` : '';
+    return `<th class="${cls}" onclick="handleSort('${c.key}')">${c.label}${mark}<span class="arr"></span></th>`;
   }).join('');
 }
+
+// ---------- column tooltip (appended to body so it isn't clipped by table overflow) ----------
+let _tipEl = null;
+function ensureTip() {
+  if (!_tipEl) { _tipEl = document.createElement('div'); _tipEl.className = 'col-tip'; document.body.appendChild(_tipEl); }
+  return _tipEl;
+}
+function showTip(el) {
+  const tip = ensureTip();
+  tip.textContent = el.getAttribute('data-tip') || '';
+  tip.style.display = 'block';
+  const r = el.getBoundingClientRect();
+  const tr = tip.getBoundingClientRect();
+  let left = r.left + r.width / 2 - tr.width / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
+  let top = r.top - tr.height - 8;
+  if (top < 8) top = r.bottom + 8; // flip below if no room above
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+function hideTip() { if (_tipEl) _tipEl.style.display = 'none'; }
+document.addEventListener('mouseover', (e) => {
+  const el = e.target.closest && e.target.closest('.info');
+  if (el) showTip(el);
+});
+document.addEventListener('mouseout', (e) => {
+  if (e.target.closest && e.target.closest('.info')) hideTip();
+});
 
 function sortRows(rows) {
   const stringKeys = { n: 1, type: 1, step: 1 };
