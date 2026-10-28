@@ -11,14 +11,14 @@
   --row-hover: #f2f1ec;
   --col-group-bg: #eceae5;
   --col-header-bg: #f5f4f0;
-  --pos: #0a7b3e;
-  --neg: #c93545;
+  --pos: #08893a;
+  --neg: #db1e2c;
   --sticky-shadow: rgba(28,43,58,0.06);
   --tab-inactive-bg: #e5e4e0;
   --tab-inactive-text: #65645f;
   --summary-bg: #f7f6f2;
-  --buy: #0a7b3e;
-  --sell: #c93545;
+  --buy: #08893a;
+  --sell: #db1e2c;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
@@ -26,9 +26,9 @@
     --text-1:#e5e4df; --text-2:#8a8985; --text-3:#5e5d58;
     --border:#2a2b30; --row-alt:#1a1b20; --row-hover:#20212a;
     --col-group-bg:#1e1f24; --col-header-bg:#1a1b20;
-    --pos:#2aad5a; --neg:#e85565; --sticky-shadow:rgba(0,0,0,0.25);
+    --pos:#2ece64; --neg:#ff5867; --sticky-shadow:rgba(0,0,0,0.25);
     --tab-inactive-bg:#1e1f24; --tab-inactive-text:#7a7975; --summary-bg:#1a1b20;
-    --buy:#2aad5a; --sell:#e85565;
+    --buy:#2ece64; --sell:#ff5867;
   }
 }
 :root[data-theme="dark"] {
@@ -36,18 +36,18 @@
   --text-1:#e5e4df; --text-2:#8a8985; --text-3:#5e5d58;
   --border:#2a2b30; --row-alt:#1a1b20; --row-hover:#20212a;
   --col-group-bg:#1e1f24; --col-header-bg:#1a1b20;
-  --pos:#2aad5a; --neg:#e85565; --sticky-shadow:rgba(0,0,0,0.25);
+  --pos:#2ece64; --neg:#ff5867; --sticky-shadow:rgba(0,0,0,0.25);
   --tab-inactive-bg:#1e1f24; --tab-inactive-text:#7a7975; --summary-bg:#1a1b20;
-  --buy:#2aad5a; --sell:#e85565;
+  --buy:#2ece64; --sell:#ff5867;
 }
 :root[data-theme="light"] {
   --page-bg:#f0efeb; --card-bg:#ffffff; --accent:#1c2b3a; --bronze:#a09078;
   --text-1:#1a1917; --text-2:#65645f; --text-3:#8a8985;
   --border:#dfdeda; --row-alt:#f9f8f5; --row-hover:#f2f1ec;
   --col-group-bg:#eceae5; --col-header-bg:#f5f4f0;
-  --pos:#0a7b3e; --neg:#c93545; --sticky-shadow:rgba(28,43,58,0.06);
+  --pos:#08893a; --neg:#db1e2c; --sticky-shadow:rgba(28,43,58,0.06);
   --tab-inactive-bg:#e5e4e0; --tab-inactive-text:#65645f; --summary-bg:#f7f6f2;
-  --buy:#0a7b3e; --sell:#c93545;
+  --buy:#08893a; --sell:#db1e2c;
 }
 
 * , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -195,8 +195,8 @@ tbody tr:nth-child(even) td { background: var(--row-alt); }
 tbody tr:nth-child(even) td:first-child { background: var(--row-alt); }
 tbody tr:hover td { background: var(--row-hover) !important; }
 
-td.pos { color: var(--pos); }
-td.neg { color: var(--neg); }
+td.pos { color: var(--pos); font-weight: 600; }
+td.neg { color: var(--neg); font-weight: 600; }
 td.muted { color: var(--text-3); }
 td.buy { color: var(--buy); font-weight: 600; }
 td.sell { color: var(--sell); font-weight: 600; }
