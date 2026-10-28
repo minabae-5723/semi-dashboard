@@ -227,7 +227,22 @@ function render() {
   $('cntNote').textContent = isSearching()
     ? `검색 "${search.trim()}" · 전체 ${rows.length}개 종목`
     : `${stgLabel} · ${rows.length}개 종목`;
+  fitTable();
 }
+
+// 표 스크롤 박스 높이를 현재 화면(또는 iframe)에 맞춰 — 가로 스크롤바가 항상 화면 안에 보이게
+function fitTable() {
+  const w = document.querySelector('.table-wrap');
+  if (!w) return;
+  const top = w.getBoundingClientRect().top;
+  const avail = window.innerHeight - top - 14;
+  w.style.maxHeight = Math.max(320, avail) + 'px';
+}
+let _fitRaf = 0;
+window.addEventListener('resize', () => {
+  if (_fitRaf) return;
+  _fitRaf = requestAnimationFrame(() => { _fitRaf = 0; fitTable(); });
+});
 
 function avg(rows, key) {
   const vals = rows.map((r) => r[key]).filter((v) => v !== null && v !== undefined && !isNaN(v));
